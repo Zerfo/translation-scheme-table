@@ -18,7 +18,7 @@ export default class ModalWindow extends Component {
       massTranslateLang: []
     };
 
-    if(this.props.add === "Сохранить"){
+    if(this.props.add === "Редактировать"){
       let taskStr = localStorage.getItem(this.props.keyLS);
       taskStr = JSON.parse(taskStr);
       this.nameTask = taskStr.nameTask;
@@ -39,6 +39,13 @@ export default class ModalWindow extends Component {
     }
   }
 
+  /**
+   * Функция проверяет на валидность поля окна
+   * @param {string} nameTask Название задачи
+   * @param {string} originalLang Язык оригинала
+   * @param {string} comment Комментарий к задаче
+   * @returns {boolean} Если все поля валидны возвращает true, иначе false
+   */
   isValid(nameTask, originalLang, comment) {
     let reg = new RegExp('[a-zA-Zа-яА-Я0-9]+');
 
@@ -51,7 +58,10 @@ export default class ModalWindow extends Component {
         break;
       }
     }
-
+    /**
+     * Определяем обект валидности полей, если какое-то из них не прошло проверку.
+     * Изменяем state компонента для отрисовки ошибок.
+     */
     if (reg.test(nameTask) && originalLang !== '' && this.state.massTranslateLang.length > 0 && reg.test(comment) && flag) {
       return true;
     } else {
@@ -78,6 +88,10 @@ export default class ModalWindow extends Component {
     }
   }
 
+  /**
+   * Функция формирует объект задачи и записывает его с localStorage
+   * @returns {boolean} Если поля прошли валидацию, перерисовывает родительский компонент и возвращает true
+   */
   addTask(){
     let nameTask = document.getElementById('nameTask').value;
     let originalLang = document.getElementById('originalLang').value;
@@ -100,6 +114,10 @@ export default class ModalWindow extends Component {
     }
   }
 
+  /**
+   * Функция формирует измененный объект задачи и записывает его с localStorage
+   * @returns {boolean} Если поля прошли валидацию, перерисовывает родительский компонент и возвращает true
+   */
   editTask(){
     let nameTask = document.getElementById('nameTask').value;
     let originalLang = document.getElementById('originalLang').value;
@@ -124,6 +142,11 @@ export default class ModalWindow extends Component {
     }
   }
 
+  /**
+   * Функция добовляет в массив выбранных для перевода языков новый язык, если того там еще нет.
+   * Перерисовывает модальное окно для отрисовки выбранного языка изменяя state
+   * @param translateLang Выбранный в селекторе язык
+   */
   addLang(translateLang){
     let flag = false;
     if(this.state.massTranslateLang.length < 1)
@@ -144,6 +167,11 @@ export default class ModalWindow extends Component {
     }
   }
 
+  /**
+   * Функция удаляет из массива выбранных языков язык по которому произашел клик.
+   * Перерисовывает модальное окно для отображения актуальных выбранных языков
+   * @param item язык по которому произошел клик для его удаления
+   */
   deleteLang(item){
     let massTranslateLang = this.state.massTranslateLang.slice();
     for(let key in massTranslateLang){

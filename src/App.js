@@ -28,10 +28,10 @@ class App extends Component {
       id: "sp",
       name: "Испанский"
     }
-  ];
-  addOrEdit = "";
-  massTask = [];
-  key = 0;
+  ]; //массив объектов доступных для перевода языков
+  addOrEdit = "";//переменная по которой определяем какого рода модальное окно показывть, добавления задачи или редактирования.
+  massTask = [];//массив уже существующих задач в localStorage. Заполняется в методе showTask
+  key = 0;//ключ который передаем в качестве пораметра в модальное окно. Если 0 то мы добавляем задачу, а не редактируем существующую
   constructor(props) {
     super(props);
     this.showTask();
@@ -42,8 +42,12 @@ class App extends Component {
 
   }
 
+  /**
+   * Функция формирует массив существующих задач если localStorage не пустой.
+   * И изменяет состояние компонента, для отрисовки существующих задач
+   */
   showTask(){
-    if(localStorage.getItem('1') !== null) {
+    if(localStorage.length > 0) {
       this.massTask = [];
       for(let i = 1; i <= localStorage.length; i++) {
         let taskStr = localStorage.getItem(`${i}`);
@@ -56,6 +60,11 @@ class App extends Component {
     }
   }
 
+  /**
+   * Функция вызывает модальное окно в React Portal
+   * @param {string} addOrEdit Определяет будем мы добавлять новую задачу или редактировать существующую
+   * @param {int} key Значение ключа задачи по которой произошел клик
+   */
   showModalAddWindow(addOrEdit, key){
       this.setState({isModalOpen: !this.state.isModalOpen});
       this.addOrEdit = addOrEdit;
@@ -74,13 +83,15 @@ class App extends Component {
               <th>Языки перевода</th>
               <th>Комментарий</th>
             </tr>
-            { localStorage.length > 0 ? this.state.massTask.map(item => {
-                return <tr><td onClick={ () => this.showModalAddWindow("edit", item.id)}>{item.nameTask}</td><td>{item.originalLang}</td><td>{item.translateLang.join(", ")}</td><td>{item.comment}</td></tr>
+            { localStorage.length > 0 ? this.state.massTask.map(item => { //Если localStorage не пустой, то отрисовываем на экране имеющиеся задачи
+              return <tr><td>{item.nameTask}<div className="pencil" onClick={ () => this.showModalAddWindow("edit", item.id)}></div></td><td>{item.originalLang}</td><td>{item.translateLang.join(", ")}</td><td>{item.comment}</td></tr>
             }) : '' }
           </table>
-          { localStorage.getItem('1') === null ? <div className="infoNoneTask">Нет ни одной схемы, <a className="noneTask" onClick={() => this.showModalAddWindow("add")}> добавить</a></div> : '' }
+          { //Если localStorage  пустой, выводим сообщение с дополнительной кнопкой добавить задачу
+            localStorage.length == 0 ? <div className="infoNoneTask">Нет ни одной схемы, <a className="noneTask" onClick={() => this.showModalAddWindow("add")}> добавить</a></div> : ''
+          }
         </div>
-        { this.state.isModalOpen ? <ModalWindow mapLang={this.mapLang} keyLS={this.key} add={this.addOrEdit === "add" ? "Добавить" : "Сохранить"} onShow={() => this.showTask()} onClose={() => this.showModalAddWindow()}/> : '' }
+        { this.state.isModalOpen ? <ModalWindow mapLang={this.mapLang} keyLS={this.key} add={this.addOrEdit === "add" ? "Добавить" : "Редактировать"} onShow={() => this.showTask()} onClose={() => this.showModalAddWindow()}/> : '' }
       </div>
     );
   }

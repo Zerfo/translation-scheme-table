@@ -75,7 +75,16 @@ td, th {
   font-size: 20px;
   margin-top: 15px;
 }
-tr td:first-child::after{
+td:hover .pencil{
+  cursor: pointer;
+  position: absolute;
+  margin-left: 200px;
+  width: 30px;
+  height: 30px;
+  background: url("/pencil.svg") no-repeat;
+  margin-top: -23px;
+}
+/*tr td:first-child::after{
   position: absolute;
   margin-left: 25px;
   width: 30px;
