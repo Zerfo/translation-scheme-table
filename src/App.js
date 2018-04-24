@@ -31,6 +31,7 @@ class App extends Component {
   ];
   addOrEdit = "";
   massTask = [];
+  key = 0;
   constructor(props) {
     super(props);
     this.showTask();
@@ -55,14 +56,15 @@ class App extends Component {
     }
   }
 
-  showModalAddWindow(addOrEdit){
+  showModalAddWindow(addOrEdit, key){
       this.setState({isModalOpen: !this.state.isModalOpen});
-      return this.addOrEdit = addOrEdit;
+      this.addOrEdit = addOrEdit;
+      this.key = key;
   }
   render() {
     return (
       <div className="container">
-        <div className="btnAdd" onClick={() => this.showModalAddWindow("add")}>Добавить</div>
+        <div className="btnAdd" onClick={() => this.showModalAddWindow("add", 0)}>Добавить</div>
         <div className="table">
           <table>
             <tr>
@@ -72,13 +74,12 @@ class App extends Component {
               <th>Комментарий</th>
             </tr>
             { localStorage.length > 0 ? this.state.massTask.map(item => {
-                //console.log(item.id);
-                return <tr><td onClick={ () => this.showModalAddWindow("edit")}>{item.nameTask}</td><td>{item.originalLang}</td><td>{item.translateLang.join(", ")}</td><td>{item.comment}</td></tr>
+                return <tr><td onClick={ () => this.showModalAddWindow("edit", item.id)}>{item.nameTask}</td><td>{item.originalLang}</td><td>{item.translateLang.join(", ")}</td><td>{item.comment}</td></tr>
             }) : '' }
           </table>
-          { localStorage.getItem('1') === null ? <div className="infoNoneTask">Нет ни одной схемы, <a className="noneTask" onClick={() => this.showModalAddWindow("add")}> добавить</a></div> : '' }
+          { localStorage.getItem('1') === null ? <div className="infoNoneTask">Нет ни одной схемы, <a className="noneTask" onClick={() => this.showModalAddWindow("add", 0)}> добавить</a></div> : '' }
         </div>
-        { this.state.isModalOpen ? <ModalWindow mapLang={this.mapLang}   add={this.addOrEdit === "add" ? "Добавить" : "Сохранить"} onShow={() => this.showTask()} onClose={() => this.showModalAddWindow()}/> : '' }
+        { this.state.isModalOpen ? <ModalWindow mapLang={this.mapLang} keyLS={this.key} add={this.addOrEdit === "add" ? "Добавить" : "Сохранить"} onShow={() => this.showTask()} onClose={() => this.showModalAddWindow()}/> : '' }
       </div>
     );
   }
