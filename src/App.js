@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import ModalWindow from './component/modalWindow';
+import ModalWindow from './modalWindow';
 
 class App extends Component {
   mapLang = [

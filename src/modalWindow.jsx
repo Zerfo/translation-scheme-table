@@ -1,15 +1,13 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
-import NameTaskInput from './NameTaskInput';
-import OriginalLangSelect from './OriginalLangSelect';
-import CommentTextArea from './CommentTextArea'
+import NameTaskInput from './component/NameTaskInput';
+import OriginalLangSelect from './component/OriginalLangSelect';
+import CommentTextArea from './component/CommentTextArea'
 
 export default class ModalWindow extends Component {
-  nameTask = "";
-  originalLang = "";
   translateLang = [];
-  comment = "";
+
   constructor(props) {
     super(props);
     this.state = {
@@ -33,9 +31,6 @@ export default class ModalWindow extends Component {
     if(this.props.add === "Редактировать"){
       let taskStr = localStorage.getItem(this.props.keyLS);
       taskStr = JSON.parse(taskStr);
-      this.nameTask = taskStr.nameTask;
-      this.originalLang = taskStr.originalLang;
-      this.comment = taskStr.comment;
       this.state = {
         validForm: {
           nameTask: true,
@@ -117,8 +112,6 @@ export default class ModalWindow extends Component {
       localStorage.setItem(task.id, JSON.stringify(task));
       this.props.onShow();
       return true;
-    }else{
-      this.render();
     }
   }
 
@@ -145,8 +138,6 @@ export default class ModalWindow extends Component {
       localStorage.setItem(this.props.keyLS, JSON.stringify(task));
       this.props.onShow();
       return true;
-    }else{
-      this.render();
     }
   }
 
@@ -232,10 +223,10 @@ export default class ModalWindow extends Component {
         <form className="modal">
           <div className="head">Добавить новую схему</div>
           <div className="body">
-            <NameTaskInput getValue={this.getValueInput} defaultValue={this.nameTask} />
+            <NameTaskInput getValue={this.getValueInput} defaultValue={this.state.values.nameTask} />
             { !this.state.validForm.nameTask ? <p className="err">Название обязательное поле!</p> : '' }
 
-            <OriginalLangSelect mapLang={this.props.mapLang} getValue={this.getValueSelect} defaultValue={this.originalLang}/>
+            <OriginalLangSelect mapLang={this.props.mapLang} getValue={this.getValueSelect} defaultValue={this.state.values.originalLang}/>
             { !this.state.validForm.originalLang ? <p className="err">Язык оригинала обязательное поле!</p> : '' }
 
             <select defaultValue={this.translateLang} ref={(select) => this.select = select} name="translateLang" id="translateLang" onChange={()=>{this.addLang(document.getElementById('translateLang').value)}}>
@@ -257,7 +248,7 @@ export default class ModalWindow extends Component {
             { !this.state.validForm.translateLang.emptyField ? <p className="err">Язык перевода обязательное поле!</p> : ''}
             { !this.state.validForm.translateLang.coincidenceLang ? <p className="err">Язык оригинала не должен совпадать с языком перевода!</p> : '' }
 
-            <CommentTextArea getValue={this.getValueComment} defaultValue={this.comment} />
+            <CommentTextArea getValue={this.getValueComment} defaultValue={this.state.values.comment} />
             { !this.state.validForm.comment ? <p className="err">Комментарий обязательное поле!</p> : '' }
 
             <div className="btn">
