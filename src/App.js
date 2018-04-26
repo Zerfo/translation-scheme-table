@@ -49,10 +49,10 @@ class App extends Component {
   showTask(){
     if(localStorage.length > 0) {
       this.massTask = [];
-      for(let i = 1; i <= localStorage.length; i++) {
-        let taskStr = localStorage.getItem(`${i}`);
+      for(let key = 1; key <= localStorage.length; key++) {
+        let taskStr = localStorage.getItem(`${key}`);
         taskStr = JSON.parse(taskStr);
-        this.massTask.push({id: i, nameTask: taskStr.nameTask, originalLang: taskStr.originalLang, translateLang: taskStr.translateLang, comment: taskStr.comment});
+        this.massTask.push({id: key, nameTask: taskStr.nameTask, originalLang: taskStr.originalLang, translateLang: taskStr.translateLang, comment: taskStr.comment});
       }
       this.setState({
         massTask: this.massTask
@@ -88,7 +88,7 @@ class App extends Component {
             }) : '' }
           </table>
           { //Если localStorage  пустой, выводим сообщение с дополнительной кнопкой добавить задачу
-            localStorage.length == 0 ? <div className="infoNoneTask">Нет ни одной схемы, <a className="noneTask" onClick={() => this.showModalAddWindow("add")}> добавить</a></div> : ''
+            localStorage.length === 0 ? <div className="infoNoneTask">Нет ни одной схемы, <a className="noneTask" onClick={() => this.showModalAddWindow("add")}> добавить</a></div> : ''
           }
         </div>
         { this.state.isModalOpen ? <ModalWindow mapLang={this.mapLang} keyLS={this.key} add={this.addOrEdit === "add" ? "Добавить" : "Редактировать"} onShow={() => this.showTask()} onClose={() => this.showModalAddWindow()}/> : '' }

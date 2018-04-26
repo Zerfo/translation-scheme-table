@@ -2,7 +2,10 @@ import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
 export default class ModalWindow extends Component {
-  nameTask = ""; originalLang = ""; translateLang = []; comment = "";
+  nameTask = "";
+  originalLang = "";
+  translateLang = [];
+  comment = "";
   constructor(props) {
     super(props);
     this.state = {
@@ -48,16 +51,7 @@ export default class ModalWindow extends Component {
    */
   isValid(nameTask, originalLang, comment) {
     let reg = new RegExp('[a-zA-Zа-яА-Я0-9]+');
-
-    let flag = false;
-    for (let i in this.state.massTranslateLang) {
-      if(originalLang !== this.state.massTranslateLang[i]) {
-        flag = true;
-      }else{
-        flag = false;
-        break;
-      }
-    }
+    const flag = this.state.massTranslateLang.every((item) => originalLang !== item);
     /**
      * Определяем обект валидности полей, если какое-то из них не прошло проверку.
      * Изменяем state компонента для отрисовки ошибок.
@@ -148,25 +142,18 @@ export default class ModalWindow extends Component {
    * @param translateLang Выбранный в селекторе язык
    */
   addLang(translateLang){
-    let flag = false;
-    if(this.state.massTranslateLang.length < 1)
-      flag = true;
-    for(let key in this.state.massTranslateLang){
-      if(this.state.massTranslateLang[key] !== translateLang)
-        flag = true;
-      else flag = false;
-    }
+    const flag = this.state.massTranslateLang.every((item) => translateLang !== item);
+
     if(flag){
       let MassTranslateLang = [];
       MassTranslateLang.push(translateLang);
       let newMassTranslateLang = MassTranslateLang.concat(this.state.massTranslateLang);
-      setTimeout(()=>{document.getElementById('translateLang').value = "";},800);
+      setTimeout(()=>{document.getElementById('translateLang').value = "";},300);
       this.setState({
         massTranslateLang: newMassTranslateLang
       });
     }
   }
-
   /**
    * Функция удаляет из массива выбранных языков язык по которому произашел клик.
    * Перерисовывает модальное окно для отображения актуальных выбранных языков
@@ -183,7 +170,6 @@ export default class ModalWindow extends Component {
       massTranslateLang: massTranslateLang
     });
   }
-
   render() {
     return ReactDOM.createPortal(
       <div className="modal-window-wrapper">
@@ -191,7 +177,6 @@ export default class ModalWindow extends Component {
         <form className="modal">
           <div className="head">Добавить новую схему</div>
           <div className="body">
-
             <input type="text" defaultValue={this.nameTask} ref={(input) => this.input = input} id="nameTask" className="nameInp" placeholder="Название"/>
             { !this.state.validForm.nameTask ? <p className="err">Название обязательное поле!</p> : '' }
 

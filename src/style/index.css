@@ -84,16 +84,6 @@ td:hover .pencil{
   background: url("/pencil.svg") no-repeat;
   margin-top: -23px;
 }
-/*tr td:first-child::after{
-  position: absolute;
-  margin-left: 25px;
-  width: 30px;
-  height: 30px;
-}
-tr td:first-child:hover::after{
-  font-size: 22px;
-  content: "\270E";
-}
 /*---------------------------Modal-------------------------------------*/
 .modal{
   z-index: 5;
