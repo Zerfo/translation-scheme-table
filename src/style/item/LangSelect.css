@@ -1,0 +1,8 @@
+.lang-select{
+  width: 500px;
+  height: 30px;
+  margin-top: 15px;
+  background-color: inherit;
+  border: 1px solid black;
+  padding-left: 10px;
+}

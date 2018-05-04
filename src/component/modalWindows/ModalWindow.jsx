@@ -1,15 +1,19 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
-import NameTaskInput from './component/NameTaskInput';
-import OriginalLangSelect from './component/OriginalLangSelect';
-import CommentTextArea from './component/CommentTextArea'
+import '../../style/modalWindows/modalWindow.css';
+
+import languageOfTranslation from '../../languageOfTranslation';
+import NameInput from '../items/NameInput';
+import LangSelect from '../items/LangSelect';
+import CommentTextarea from '../items/CommentTextarea';
+import ShowItemMass from '../items/ShowItemMass';
+import BtnClick from '../items/BtnClick';
 
 export default class ModalWindow extends Component {
-  translateLang = [];
-
   constructor(props) {
     super(props);
+
     this.state = {
       validForm: {
         nameTask: true,
@@ -20,15 +24,15 @@ export default class ModalWindow extends Component {
         },
         comment: true
       },
-      massTranslateLang: [],
       values: {
+        massTranslateLang: [],
         nameTask: '',
         originalLang: '',
         comment: ''
       }
     };
 
-    if(this.props.add === "Редактировать"){
+    if(this.props.addOredit === "edit") {
       let taskStr = localStorage.getItem(this.props.keyLS);
       taskStr = JSON.parse(taskStr);
       this.state = {
@@ -41,13 +45,13 @@ export default class ModalWindow extends Component {
           },
           comment: true
         },
-        massTranslateLang: taskStr.translateLang,
         values: {
+          massTranslateLang: taskStr.translateLang,
           nameTask: taskStr.nameTask,
           originalLang: taskStr.originalLang,
           comment: taskStr.comment
         }
-      };
+      }
     }
   }
 
@@ -60,12 +64,12 @@ export default class ModalWindow extends Component {
    */
   isValid(nameTask, originalLang, comment) {
     let reg = new RegExp('[a-zA-Zа-яА-Я0-9]+');
-    const flag = this.state.massTranslateLang.every((item) => originalLang !== item);
+    const flag = this.state.values.massTranslateLang.every((item) => originalLang !== item);
     /**
      * Определяем обект валидности полей, если какое-то из них не прошло проверку.
      * Изменяем state компонента для отрисовки ошибок.
      */
-    if (reg.test(nameTask) && originalLang !== '' && this.state.massTranslateLang.length > 0 && reg.test(comment) && flag) {
+    if (reg.test(nameTask) && originalLang !== '' && this.state.values.massTranslateLang.length > 0 && reg.test(comment) && flag) {
       return true;
     } else {
       let isInvalid = {
@@ -80,13 +84,13 @@ export default class ModalWindow extends Component {
       isInvalid.nameTask = reg.test(nameTask) ? true : false;
       isInvalid.originalLang = originalLang !== '' ? true : false;
       isInvalid.translateLang = {};
-      isInvalid.translateLang.emptyField = this.state.massTranslateLang.length > 0 ? true : false;
+      isInvalid.translateLang.emptyField = this.state.values.massTranslateLang.length > 0 ? true : false;
       for (let key in this.state.massTranslateLang) {
-        isInvalid.translateLang.coincidenceLang = originalLang !== this.state.massTranslateLang[key] ? true : false;
+        isInvalid.translateLang.coincidenceLang = originalLang !== this.state.values.massTranslateLang[key] ? true : false;
         if(isInvalid.translateLang.coincidenceLang === false){ break; }
       }
       isInvalid.comment = reg.test(comment) ? true : false;
-      setTimeout(this.setState({validForm: isInvalid}),500);
+      this.setState({validForm: isInvalid});
       return false;
     }
   }
@@ -95,86 +99,88 @@ export default class ModalWindow extends Component {
    * Функция формирует объект задачи и записывает его с localStorage
    * @returns {boolean} Если поля прошли валидацию, перерисовывает родительский компонент и возвращает true
    */
-  addTask(){
-    const nameTask = this.state.values.nameTask;
-    const originalLang = this.state.values.originalLang;
-    const comment = this.state.values.comment;
-
-    let isValid = this.isValid(nameTask, originalLang, comment);
+  addTask = () => {
+    let isValid = this.isValid(this.state.values.nameTask, this.state.values.originalLang, this.state.values.comment);
     if(isValid === true){
       let task = {
         id: localStorage.length + 1,
-        nameTask: nameTask,
-        originalLang: originalLang,
-        translateLang: this.state.massTranslateLang,
-        comment: comment
+        nameTask: this.state.values.nameTask,
+        originalLang: this.state.values.originalLang,
+        translateLang: this.state.values.massTranslateLang,
+        comment: this.state.values.comment
       };
       localStorage.setItem(task.id, JSON.stringify(task));
       this.props.onShow();
+      this.props.onClose();
       return true;
     }
-  }
+
+  };
 
   /**
    * Функция формирует измененный объект задачи и записывает его с localStorage
    * @returns {boolean} Если поля прошли валидацию, перерисовывает родительский компонент и возвращает true
    */
-  editTask(){
-    const nameTask = this.state.values.nameTask;
-    const originalLang = this.state.values.originalLang;
-    const comment = this.state.values.comment;
-
-    let isValid = this.isValid(nameTask, originalLang, comment);
-
+  editTask = () => {
+    let isValid = this.isValid(this.state.values.nameTask, this.state.values.originalLang, this.state.values.comment);
     if(isValid === true){
-      const task = {
-        id: this.props.key,
-        nameTask: nameTask,
-        originalLang: originalLang,
-        translateLang: this.state.massTranslateLang,
-        comment: comment
+      let task = {
+        id: localStorage.length + 1,
+        nameTask: this.state.values.nameTask,
+        originalLang: this.state.values.originalLang,
+        translateLang: this.state.values.massTranslateLang,
+        comment: this.state.values.comment
       };
       localStorage.removeItem(this.props.keyLS);
       localStorage.setItem(this.props.keyLS, JSON.stringify(task));
       this.props.onShow();
+      this.props.onClose();
       return true;
     }
-  }
+  };
 
   /**
    * Функция добовляет в массив выбранных для перевода языков новый язык, если того там еще нет.
    * Перерисовывает модальное окно для отрисовки выбранного языка изменяя state
    * @param translateLang Выбранный в селекторе язык
    */
-  addLang(translateLang){
-    const flag = this.state.massTranslateLang.every((item) => translateLang !== item);
+  addLang = (value) => {
+    const flag = this.state.values.massTranslateLang.every(item => value !== item);
 
-    if(flag){
-      let MassTranslateLang = [];
-      MassTranslateLang.push(translateLang);
-      let newMassTranslateLang = MassTranslateLang.concat(this.state.massTranslateLang);
-      setTimeout(()=>{document.getElementById('translateLang').value = "";},300);
+    if(flag) {
+      let massTranslateLang = [value].concat(this.state.values.massTranslateLang);
       this.setState({
-        massTranslateLang: newMassTranslateLang
+        values: {
+          massTranslateLang: massTranslateLang,
+          nameTask: this.state.values.nameTask,
+          originalLang: this.state.values.originalLang,
+          comment: this.state.values.comment
+        }
       });
     }
-  }
+  };
+
   /**
    * Функция удаляет из массива выбранных языков язык по которому произашел клик.
    * Перерисовывает модальное окно для отображения актуальных выбранных языков
    * @param item язык по которому произошел клик для его удаления
    */
-  deleteLang(item){
-    let massTranslateLang = this.state.massTranslateLang.slice();
+  deleteLang = (item) => {
+    let massTranslateLang = this.state.values.massTranslateLang.slice();
     for(let key in massTranslateLang){
       if(massTranslateLang[key] === item){
         massTranslateLang.splice(key, 1);
       }
     }
     this.setState({
-      massTranslateLang: massTranslateLang
+      values: {
+        massTranslateLang: massTranslateLang,
+        nameTask: this.state.values.nameTask,
+        originalLang: this.state.values.originalLang,
+        comment: this.state.values.comment
+      }
     });
-  }
+  };
 
   /**
    * Функция получает value из поля "Название"
@@ -183,12 +189,14 @@ export default class ModalWindow extends Component {
   getValueInput = (value) => {
     this.setState({
       values: {
+        massTranslateLang: this.state.values.massTranslateLang,
         nameTask: value,
         originalLang: this.state.values.originalLang,
         comment: this.state.values.comment
       }
     })
   };
+
   /**
    * Функция получает value из поля "Язык оригинала"
    * @param {string} value значение поля
@@ -196,12 +204,14 @@ export default class ModalWindow extends Component {
   getValueSelect = (value) => {
     this.setState({
       values: {
+        massTranslateLang: this.state.values.massTranslateLang,
         nameTask: this.state.values.nameTask,
         originalLang: value,
         comment: this.state.values.comment
       }
     })
   };
+
   /**
    * Функция получает value из поля "Комментарий"
    * @param {string} value значение поля
@@ -209,6 +219,7 @@ export default class ModalWindow extends Component {
   getValueComment = (value) => {
     this.setState({
       values: {
+        massTranslateLang: this.state.values.massTranslateLang,
         nameTask: this.state.values.nameTask,
         originalLang: this.state.values.originalLang,
         comment: value
@@ -218,48 +229,63 @@ export default class ModalWindow extends Component {
 
   render() {
     return ReactDOM.createPortal(
-      <div className="modal-window-wrapper">
+      <div className = "modal-window-wrapper">
+        <form className = "modal">
+          <div className = "head">Добавить новую схему</div>
+          <div className = "body">
+            <NameInput
+              getValue = { this.getValueInput }
+              defaultValue = { this.state.values.nameTask }
+            />
+            { !this.state.validForm.nameTask && <p className = "err">Название обязательное поле!</p> }
 
-        <form className="modal">
-          <div className="head">Добавить новую схему</div>
-          <div className="body">
-            <NameTaskInput getValue={this.getValueInput} defaultValue={this.state.values.nameTask} />
-            { !this.state.validForm.nameTask ? <p className="err">Название обязательное поле!</p> : '' }
+            <LangSelect
+              textType = "Выберите язык оригинала"
+              getValue = { this.getValueSelect }
+              mapLang = { languageOfTranslation }
+              defaultValue = { this.state.values.originalLang }
+            />
+            { !this.state.validForm.originalLang && <p className = "err">Язык оригинала обязательное поле!</p> }
 
-            <OriginalLangSelect mapLang={this.props.mapLang} getValue={this.getValueSelect} defaultValue={this.state.values.originalLang}/>
-            { !this.state.validForm.originalLang ? <p className="err">Язык оригинала обязательное поле!</p> : '' }
+            <LangSelect
+              textType = "Выберите язык перевода"
+              getValue = { this.addLang }
+              mapLang = { languageOfTranslation }
+              defaultValue = { this.state.values.originalLang }
+            />
+            <ShowItemMass
+              mass = { this.state.values.massTranslateLang }
+              deleteLang = { (item) => this.deleteLang(item) }
+            />
+            { !this.state.validForm.translateLang.emptyField && <p className = "err">Язык перевода обязательное поле!</p>}
+            { !this.state.validForm.translateLang.coincidenceLang && <p className = "err">Язык оригинала не должен совпадать с языком перевода!</p> }
 
-            <select defaultValue={this.translateLang} ref={(select) => this.select = select} name="translateLang" id="translateLang" onChange={()=>{this.addLang(document.getElementById('translateLang').value)}}>
-              <option value="" disabled selected>Выберите язык перевода</option>
-              { this.props.mapLang.map(item => {
-                  return <option key={item.id} value={item.id}>{item.name}</option>
-                })
-              }
-            </select>
+            <CommentTextarea
+              defaultValue = { this.state.values.comment }
+              getValue = { this.getValueComment }
+            />
+            { !this.state.validForm.comment && <p className = "err">Комментарий обязательное поле!</p> }
 
-            <div className="selectLang">
-              {
-                this.state.massTranslateLang.map(item => {
-                  return <div key={item.id} className="lang" onClick={ () => {this.deleteLang(item)}}>{item}</div>
-                })
+            <div className = "btn">
+              <BtnClick
+                funcClick = { this.props.onClose }
+                btnText = { "Отмена" }
+              />
+              { this.props.addOredit === 'add' ?
+                  <BtnClick
+                    funcClick = { () => this.addTask() }
+                    btnText = { "Добавить" }
+                  />
+                :
+                  <BtnClick
+                    funcClick = { () => this.editTask() }
+                    btnText = { "Редактировать" }
+                  />
               }
             </div>
-
-            { !this.state.validForm.translateLang.emptyField ? <p className="err">Язык перевода обязательное поле!</p> : ''}
-            { !this.state.validForm.translateLang.coincidenceLang ? <p className="err">Язык оригинала не должен совпадать с языком перевода!</p> : '' }
-
-            <CommentTextArea getValue={this.getValueComment} defaultValue={this.state.values.comment} />
-            { !this.state.validForm.comment ? <p className="err">Комментарий обязательное поле!</p> : '' }
-
-            <div className="btn">
-              <div className="btnAdd" onClick={this.props.onClose}>Отмена</div>
-              <div className="btnAdd" onClick={() => { if(this.props.add === "Добавить" ? this.addTask() : this.editTask()){ this.props.onClose();} }}>{this.props.add}</div>
-            </div>
-
           </div>
         </form>
-
-        <div className="overlay" onClick={this.props.onClose}/>
+        <div className = "overlay" onClick = { this.props.onClose }/>
       </div>,
       document.getElementById('modal')
     );
