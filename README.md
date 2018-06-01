@@ -1,4 +1,4 @@
-# [React](https://reactjs.org/)&middot;![npm version](https://img.shields.io/npm/v/react.svg?style=flat)
+# [React](https://reactjs.org/)&middot;![npm version](https://img.shields.io/npm/v/react.svg?style=flat) &middot; [Redux](https://redux.js.org/)&middot;![npm version](https://img.shields.io/npm/v/redux.svg?style=flat) 
 # Страница, для отображения списка схем перевода в виде таблицы:
   **Данные о схемах сохраняются в localStorage. При первом открытии страницы
     отображается кнопка "добавить" а так же таблица с шапкой и строкой “Нет ни одной схемы,
