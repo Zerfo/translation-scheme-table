@@ -1,7 +1,11 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
+import { connect } from 'react-redux'
 
 import '../../style/modalWindows/modalWindow.css';
+
+import * as Actions from '../../actions/Actions';
+import store from '../../index';
 
 import languageOfTranslation from '../../languageOfTranslation';
 import NameInput from '../items/NameInput';
@@ -10,10 +14,17 @@ import CommentTextarea from '../items/CommentTextarea';
 import ShowItemMass from '../items/ShowItemMass';
 import BtnClick from '../items/BtnClick';
 
-export default class ModalWindow extends Component {
+function mapStateToProps(state) {
+  return {
+    tasks: state.tasks
+  }
+}
+
+class ModalWindow extends Component {
   constructor(props) {
     super(props);
-
+    const keyLS = this.props.keyLS;
+    let taskStr = JSON.parse(localStorage.getItem(keyLS.toString()));
     this.state = {
       validForm: {
         nameTask: true,
@@ -25,34 +36,12 @@ export default class ModalWindow extends Component {
         comment: true
       },
       values: {
-        massTranslateLang: [],
-        nameTask: '',
-        originalLang: '',
-        comment: ''
+        massTranslateLang: taskStr.translateLang,
+        nameTask: taskStr.nameTask,
+        originalLang: taskStr.originalLang,
+        comment: taskStr.comment
       }
     };
-
-    if(this.props.addOredit === "edit") {
-      let taskStr = localStorage.getItem(this.props.keyLS);
-      taskStr = JSON.parse(taskStr);
-      this.state = {
-        validForm: {
-          nameTask: true,
-          originalLang: true,
-          translateLang: {
-            coincidenceLang: true,
-            emptyField: true
-          },
-          comment: true
-        },
-        values: {
-          massTranslateLang: taskStr.translateLang,
-          nameTask: taskStr.nameTask,
-          originalLang: taskStr.originalLang,
-          comment: taskStr.comment
-        }
-      }
-    }
   }
 
   /**
@@ -62,7 +51,7 @@ export default class ModalWindow extends Component {
    * @param {string} comment Комментарий к задаче
    * @returns {boolean} Если все поля валидны возвращает true, иначе false
    */
-  isValid(nameTask, originalLang, comment) {
+  isValid = (nameTask, originalLang, comment) => {
     let reg = new RegExp('[a-zA-Zа-яА-Я0-9]+');
     const flag = this.state.values.massTranslateLang.every((item) => originalLang !== item);
     /**
@@ -72,15 +61,7 @@ export default class ModalWindow extends Component {
     if (reg.test(nameTask) && originalLang !== '' && this.state.values.massTranslateLang.length > 0 && reg.test(comment) && flag) {
       return true;
     } else {
-      let isInvalid = {
-        nameTask: true,
-        originalLang: true,
-        translateLang: {
-          coincidenceLang: true,
-          emptyField: true
-        },
-        comment: true
-      };
+      let isInvalid = {};
       isInvalid.nameTask = reg.test(nameTask) ? true : false;
       isInvalid.originalLang = originalLang !== '' ? true : false;
       isInvalid.translateLang = {};
@@ -93,7 +74,7 @@ export default class ModalWindow extends Component {
       this.setState({validForm: isInvalid});
       return false;
     }
-  }
+  };
 
   /**
    * Функция формирует объект задачи и записывает его с localStorage
@@ -103,37 +84,36 @@ export default class ModalWindow extends Component {
     let isValid = this.isValid(this.state.values.nameTask, this.state.values.originalLang, this.state.values.comment);
     if(isValid === true){
       let task = {
-        id: localStorage.length + 1,
+        id: localStorage.length,
         nameTask: this.state.values.nameTask,
         originalLang: this.state.values.originalLang,
         translateLang: this.state.values.massTranslateLang,
         comment: this.state.values.comment
       };
       localStorage.setItem(task.id, JSON.stringify(task));
-      this.props.onShow();
+      store.dispatch(Actions.addTask(task));
       this.props.onClose();
       return true;
     }
-
   };
 
   /**
    * Функция формирует измененный объект задачи и записывает его с localStorage
    * @returns {boolean} Если поля прошли валидацию, перерисовывает родительский компонент и возвращает true
    */
-  editTask = () => {
+  editTask = (key) => {
     let isValid = this.isValid(this.state.values.nameTask, this.state.values.originalLang, this.state.values.comment);
     if(isValid === true){
       let task = {
-        id: localStorage.length + 1,
+        id: key,
         nameTask: this.state.values.nameTask,
         originalLang: this.state.values.originalLang,
         translateLang: this.state.values.massTranslateLang,
         comment: this.state.values.comment
       };
-      localStorage.removeItem(this.props.keyLS);
-      localStorage.setItem(this.props.keyLS, JSON.stringify(task));
-      this.props.onShow();
+      localStorage.removeItem(key);
+      localStorage.setItem(key, JSON.stringify(task));
+      store.dispatch(Actions.editTask(task));
       this.props.onClose();
       return true;
     }
@@ -148,14 +128,9 @@ export default class ModalWindow extends Component {
     const flag = this.state.values.massTranslateLang.every(item => value !== item);
 
     if(flag) {
-      let massTranslateLang = [value].concat(this.state.values.massTranslateLang);
+      let massTranslateLang = this.state.values.massTranslateLang.concat(value);
       this.setState({
-        values: {
-          massTranslateLang: massTranslateLang,
-          nameTask: this.state.values.nameTask,
-          originalLang: this.state.values.originalLang,
-          comment: this.state.values.comment
-        }
+        values: { ...this.state.values, massTranslateLang: massTranslateLang }
       });
     }
   };
@@ -165,7 +140,7 @@ export default class ModalWindow extends Component {
    * Перерисовывает модальное окно для отображения актуальных выбранных языков
    * @param item язык по которому произошел клик для его удаления
    */
-  deleteLang = (item) => {
+  deleteLang = (item) => {//переписать с методом filter();
     let massTranslateLang = this.state.values.massTranslateLang.slice();
     for(let key in massTranslateLang){
       if(massTranslateLang[key] === item){
@@ -173,12 +148,7 @@ export default class ModalWindow extends Component {
       }
     }
     this.setState({
-      values: {
-        massTranslateLang: massTranslateLang,
-        nameTask: this.state.values.nameTask,
-        originalLang: this.state.values.originalLang,
-        comment: this.state.values.comment
-      }
+      values: { ...this.state.values, massTranslateLang: massTranslateLang }
     });
   };
 
@@ -188,13 +158,8 @@ export default class ModalWindow extends Component {
    */
   getValueInput = (value) => {
     this.setState({
-      values: {
-        massTranslateLang: this.state.values.massTranslateLang,
-        nameTask: value,
-        originalLang: this.state.values.originalLang,
-        comment: this.state.values.comment
-      }
-    })
+      values: { ...this.state.values, nameTask: value }
+    });
   };
 
   /**
@@ -203,13 +168,8 @@ export default class ModalWindow extends Component {
    */
   getValueSelect = (value) => {
     this.setState({
-      values: {
-        massTranslateLang: this.state.values.massTranslateLang,
-        nameTask: this.state.values.nameTask,
-        originalLang: value,
-        comment: this.state.values.comment
-      }
-    })
+      values: { ...this.state.values, originalLang: value }
+    });
   };
 
   /**
@@ -218,13 +178,8 @@ export default class ModalWindow extends Component {
    */
   getValueComment = (value) => {
     this.setState({
-      values: {
-        massTranslateLang: this.state.values.massTranslateLang,
-        nameTask: this.state.values.nameTask,
-        originalLang: this.state.values.originalLang,
-        comment: value
-      }
-    })
+      values: { ...this.state.values, comment: value, }
+    });
   };
 
   render() {
@@ -251,7 +206,7 @@ export default class ModalWindow extends Component {
               textType = "Выберите язык перевода"
               getValue = { this.addLang }
               mapLang = { languageOfTranslation }
-              defaultValue = { this.state.values.originalLang }
+              defaultValue = { this.state.values.massTranslateLang[0] }
             />
             <ShowItemMass
               mass = { this.state.values.massTranslateLang }
@@ -271,14 +226,14 @@ export default class ModalWindow extends Component {
                 funcClick = { this.props.onClose }
                 btnText = { "Отмена" }
               />
-              { this.props.addOredit === 'add' ?
+              { this.props.addOrEdit === 'add' ?
                   <BtnClick
                     funcClick = { () => this.addTask() }
                     btnText = { "Добавить" }
                   />
                 :
                   <BtnClick
-                    funcClick = { () => this.editTask() }
+                    funcClick = { () => this.editTask(this.props.keyLS) }
                     btnText = { "Редактировать" }
                   />
               }
@@ -291,3 +246,5 @@ export default class ModalWindow extends Component {
     );
   }
 }
+
+export default connect(mapStateToProps)(ModalWindow)
