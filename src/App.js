@@ -14,6 +14,7 @@ function mapStateToProps(state) {
 
 class App extends Component {
   defineTask = { addOrEdit: 'add', key: 0 };
+
   constructor(props){
     super(props);
     this.state = {

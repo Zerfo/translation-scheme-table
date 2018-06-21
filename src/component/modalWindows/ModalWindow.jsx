@@ -77,7 +77,7 @@ class ModalWindow extends Component {
   };
 
   /**
-   * Функция формирует объект задачи и записывает его с localStorage
+   * Функция формирует объект задачи, записывает его с localStorage и store
    * @returns {boolean} Если поля прошли валидацию, перерисовывает родительский компонент и возвращает true
    */
   addTask = () => {
@@ -98,7 +98,7 @@ class ModalWindow extends Component {
   };
 
   /**
-   * Функция формирует измененный объект задачи и записывает его с localStorage
+   * @param key Ключ редактируемой задачи
    * @returns {boolean} Если поля прошли валидацию, перерисовывает родительский компонент и возвращает true
    */
   editTask = (key) => {
@@ -113,7 +113,7 @@ class ModalWindow extends Component {
       };
       localStorage.removeItem(key);
       localStorage.setItem(key, JSON.stringify(task));
-      store.dispatch(Actions.editTask(task));
+      store.dispatch(Actions.editTask());
       this.props.onClose();
       return true;
     }

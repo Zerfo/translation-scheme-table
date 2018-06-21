@@ -5,9 +5,8 @@ export function addTask(task) {
   }
 }
 
-export function editTask(task) {
+export function editTask() {
   return {
-    type: 'editTask',
-    payload: task
+    type: 'editTask'
   }
 }
